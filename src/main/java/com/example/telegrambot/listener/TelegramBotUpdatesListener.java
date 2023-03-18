@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
-    private static final Logger LOG = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private static final Pattern NOTIFICATION_TASK_PATTERN = Pattern.compile(
             "([\\d\\\\.:\\s]{16})(\\s)([А-яA-z\\s\\d]+)");
 
@@ -46,7 +46,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         try {
             updates.forEach(update -> {
-                LOG.info("Processing update: {}", update);
+                LOGGER.info("Processing update: {}", update);
                 User user = update.message().from();
                 String text = update.message().text();
                 if ("/start".equals(text)) {
@@ -78,16 +78,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
-    @Scheduled(fixedDelay = 60 * 1_000)
-    public void checkNotifications() {
-        notificationTaskService.findNotificationsForSend().forEach(notificationTask -> {
-            telegramBot.execute(
-                    new SendMessage(notificationTask.getUserId(),
-                            "Вы просили напомнить об этом: " + notificationTask.getMessage())
-            );
-            notificationTaskService.deleteTask(notificationTask);
-        });
-    }
+
 
     @Nullable
     private LocalDateTime parseLocalDateTime(String localDateTime) {
